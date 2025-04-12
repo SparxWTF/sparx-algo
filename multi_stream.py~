@@ -104,6 +104,15 @@ def trade_worker():
             if imbalance is not None:
                 fear = local_fear_index(imbalance, volume_ratio, slope)
                 if fear >= 2:
+                    description = "😱 FEAR zone – possible panic/reversal"
+                    if not hasattr(trade_worker, '_last_skipped'):
+                        trade_worker._last_skipped = {}
+                    last = trade_worker._last_skipped.get(symbol)
+                    now = datetime.now().timestamp()
+                    if not last or now - last > 60:
+                        print(f"[{symbol}] ⛔ SKIPPING BUY – High local fear index: {fear} → {description}")
+                        send_telegram_message(f"⛔ SKIPPED BUY for {symbol} due to high Fear Index: {fear} → {description}")
+                        trade_worker._last_skipped[symbol] = now
                     continue
 
                 if should_buy(imbalance, volume_ratio, slope):
