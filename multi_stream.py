@@ -1,16 +1,42 @@
+"""
+This module implements a multi-stream cryptocurrency trading data collector using Binance API.
+
+It monitors multiple trading pairs for real-time trade and order book data,
+calculates various metrics such as buy/sell volume ratios and order book imbalances,
+and performs trend analysis on price movements.
+
+Key components:
+- Binance WebSocket connections for multiple symbols
+- Real-time trade and order book data processing
+- Rolling window calculations for volume analysis
+- Linear regression for trend analysis
+
+Dependencies:
+- binance
+- datetime
+- collections
+- trend (custom module)
+- symbols (custom module)
+- numpy
+- sklearn
+"""
+
 from binance import ThreadedWebsocketManager, Client
 from datetime import datetime
 from collections import deque, defaultdict
 from trend import add_price, print_trend_info, price_window
 from symbols import get_top_volume_symbols
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+api_key = os.getenv('BINANCE_API_KEY')
+api_secret = os.getenv('BINANCE_API_SECRET')
 
 # --- Globalne struktury danych ---
 rolling_window = 5  # sekundy do liczenia buy/sell volume
 trade_buffers = defaultdict(list)  # {symbol: [trades]}
-
-# --- Binance API ---
-api_key = '9oMd3Ehs5oLzckNUTUn5ncaHENyzYTjVD6UQEHzmPIklyafdhP7UbO6U0cWEqjEF'
-api_secret = ' XYCNHpc4egWSXG08fcnG1t9C2Uwufxe24mOwxK2nvYzioNSLbpuy2VOByGeLxRtd'
 
 # --- Inicjalizacja trendów per symbol ---
 symbol_price_windows = defaultdict(lambda: deque(maxlen=30))

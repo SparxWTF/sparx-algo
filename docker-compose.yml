@@ -1,0 +1,9 @@
+version: "3.9"
+
+services:
+  sparx-algo:
+    build: .
+    container_name: sparx-bot
+    env_file: .env
+    restart: unless-stopped
+    command: python multi_stream.py
