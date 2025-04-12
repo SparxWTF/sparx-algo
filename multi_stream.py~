@@ -1,26 +1,3 @@
-"""
-This module implements a multi-stream cryptocurrency trading data collector using Binance API.
-
-It monitors multiple trading pairs for real-time trade and order book data,
-calculates various metrics such as buy/sell volume ratios and order book imbalances,
-and performs trend analysis on price movements.
-
-Key components:
-- Binance WebSocket connections for multiple symbols
-- Real-time trade and order book data processing
-- Rolling window calculations for volume analysis
-- Linear regression for trend analysis
-
-Dependencies:
-- binance
-- datetime
-- collections
-- trend (custom module)
-- symbols (custom module)
-- numpy
-- sklearn
-"""
-
 import queue
 from threading import Thread
 from datetime import datetime

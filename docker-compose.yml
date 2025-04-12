@@ -1,14 +1,12 @@
-version: '3.8'
+version: '3.3'
 
 services:
   bot:
     build: .
     container_name: sparx-bot
-    restart: always                # <- Kluczowe!
+    restart: always
     env_file:
       - .env
-    volumes:
-      - ./logs:/app/logs           # opcjonalnie logi
     logging:
       driver: "json-file"
       options:
