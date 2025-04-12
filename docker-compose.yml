@@ -1,17 +1,16 @@
 version: '3.8'
+
 services:
   bot:
     build: .
+    container_name: sparx-bot
+    restart: always                # <- Kluczowe!
     env_file:
       - .env
-    restart: always
-
-  mongo:
-    image: mongo:6
-    ports:
-      - "27017:27017"
     volumes:
-      - mongo_data:/data/db
-
-volumes:
-  mongo_data:
+      - ./logs:/app/logs           # opcjonalnie logi
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
