@@ -13,6 +13,17 @@ from binance import ThreadedWebsocketManager
 import os
 from dotenv import load_dotenv
 import requests
+import time
+
+def heartbeat():
+    while True:
+        try:
+            now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            send_telegram_message(f"✅ Bot is alive. Heartbeat @ {now}")
+        except Exception as e:
+            print(f"[Heartbeat Error] {e}")
+        time.sleep(3600)  # 1 godzina
+
 
 load_dotenv()
 
@@ -162,6 +173,8 @@ def orderbook_worker():
 
 Thread(target=trade_worker, daemon=True).start()
 Thread(target=orderbook_worker, daemon=True).start()
+Thread(target=heartbeat, daemon=True).start()
+
 
 def main():
     try:
