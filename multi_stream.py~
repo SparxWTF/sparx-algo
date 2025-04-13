@@ -26,8 +26,9 @@ from collections import deque, defaultdict
 import numpy as np
 from sklearn.linear_model import LinearRegression
 import traceback
-from strategy import should_buy, should_sell, record_buy_signal, record_sell_signal, get_open_position, init_mongo_connection, calculate_trend_divergence
-from symbols import get_top_volume_symbols
+
+from strategy import should_buy, should_sell, record_buy_signal, record_sell_signal, get_open_position, init_mongo_connection
+from symbols import get_top_volume_symbols, calculate_trend_divergence
 from binance import ThreadedWebsocketManager
 import os
 from dotenv import load_dotenv

@@ -2,6 +2,8 @@ from datetime import datetime
 from uuid import uuid4
 from pymongo import MongoClient
 import os
+import numpy as np
+from sklearn.linear_model import LinearRegression
 
 # === MongoDB ===
 def init_mongo_connection():
@@ -26,7 +28,7 @@ def should_sell(imbalance, volume_ratio, slope):
     )
 
 # === Zapis BUY ===
-def record_buy_signal(mongo_db, symbol, price, imbalance, volume_ratio, slope):
+def record_buy_signal(mongo_db, symbol, price, imbalance, volume_ratio, slope, fear, divergence):
     trade_id = str(uuid4())
     timestamp = datetime.utcnow()
     mongo_db.signals.insert_one({
@@ -37,12 +39,14 @@ def record_buy_signal(mongo_db, symbol, price, imbalance, volume_ratio, slope):
         "imbalance": imbalance,
         "volume_ratio": volume_ratio,
         "slope": slope,
+        "fear_index": fear,
+        "divergence": divergence,
         "timestamp": timestamp
     })
     return trade_id
 
 # === Zapis SELL ===
-def record_sell_signal(mongo_db, symbol, price, imbalance, volume_ratio, slope):
+def record_sell_signal(mongo_db, symbol, price, imbalance, volume_ratio, slope, fear, divergence):
     last_buy = mongo_db.signals.find_one({
         "symbol": symbol,
         "signal_type": "BUY"
@@ -59,6 +63,8 @@ def record_sell_signal(mongo_db, symbol, price, imbalance, volume_ratio, slope):
             "imbalance": imbalance,
             "volume_ratio": volume_ratio,
             "slope": slope,
+            "fear_index": fear,
+            "divergence": divergence,
             "timestamp": datetime.utcnow(),
             "profit_pct": profit_pct
         })
@@ -81,3 +87,27 @@ def get_open_position(mongo_db, symbol):
             return last_buy
 
     return None
+
+# === Dywergencja z trendem długo-/krótkoterminowym ===
+def calculate_trend_divergence(price_window):
+    if len(price_window) < 20:
+        return None
+
+    short_window = np.array(price_window)[-10:]
+    long_window = np.array(price_window)[-20:]
+
+    log_short = np.log(short_window)
+    log_long = np.log(long_window)
+
+    X_short = np.arange(len(log_short)).reshape(-1, 1)
+    X_long = np.arange(len(log_long)).reshape(-1, 1)
+
+    slope_short = LinearRegression().fit(X_short, log_short).coef_[0]
+    slope_long = LinearRegression().fit(X_long, log_long).coef_[0]
+
+    divergence = slope_short - slope_long
+    return {
+        "slope_short": slope_short,
+        "slope_long": slope_long,
+        "divergence": divergence
+    }
