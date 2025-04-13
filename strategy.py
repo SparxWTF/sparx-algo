@@ -13,16 +13,16 @@ def init_mongo_connection():
 # === Logika strategii ===
 def should_buy(imbalance, volume_ratio, slope):
     return (
-        imbalance > 0.35 and
-        volume_ratio > 1.5 and
-        slope is not None and slope > 0.001
+        imbalance > 0.25 and
+        volume_ratio > 1.2 and
+        slope is not None and slope > 0.0005
     )
 
 def should_sell(imbalance, volume_ratio, slope):
     return (
-        imbalance < -0.35 and
-        volume_ratio < 0.65 and
-        slope is not None and slope < -0.001
+        imbalance < -0.25 and
+        volume_ratio < 0.8 and
+        slope is not None and slope < -0.0005
     )
 
 # === Zapis BUY ===
