@@ -38,6 +38,14 @@ from dotenv import load_dotenv
 import requests
 import time
 
+def send_telegram_message(message):
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
+    try:
+        requests.post(url, data=payload)
+    except Exception as e:
+        print(f"[Telegram Error] {e}")
+
 def heartbeat():
     while True:
         try:
@@ -47,6 +55,16 @@ def heartbeat():
             print(f"[Heartbeat Error] {e}")
         time.sleep(3600)  # 1 godzina
 
+def test_mongo_connection(mongo_db):
+    try:
+        mongo_db.command("ping")
+        msg = "✅ MongoDB connection successful."
+        print(msg)
+        send_telegram_message(msg)
+    except Exception as e:
+        msg = f"❌ MongoDB connection FAILED: {e}"
+        print(msg)
+        send_telegram_message(msg)
 
 load_dotenv()
 
@@ -56,6 +74,7 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 mongo_db = init_mongo_connection()
+test_mongo_connection(mongo_db)
 
 rolling_window = 5
 trade_buffers = defaultdict(list)
@@ -65,13 +84,7 @@ latest_imbalance = {}
 trade_queue = queue.Queue()
 orderbook_queue = queue.Queue()
 
-def send_telegram_message(message):
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
-    try:
-        requests.post(url, data=payload)
-    except Exception as e:
-        print(f"[Telegram Error] {e}")
+
 
 def handle_trade(msg):
     trade_queue.put(msg)
